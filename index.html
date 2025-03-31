@@ -48,6 +48,7 @@
         uniform: {
           label: "Strict Uniform Rules",
           title: "A message regarding School Uniform Standards",
+          role: "Head of Uniform Policy",
           body: `
 Dear Students,
 
@@ -77,9 +78,9 @@ Students should not wear make-up to school. This includes mascara, eyeliner, lip
 
 Our College remains committed to standards of decorum and conformity.
 
-Yours sincerely,`
+Yours sincerely,`,
         },
-      }
+      };
 
       function init() {
         populateTemplateSelect();
@@ -101,6 +102,7 @@ Yours sincerely,`
         document
           .querySelector("textarea#message")
           .addEventListener("input", updatePreview);
+        document.querySelector("input#signoffRole").addEventListener("input", updatePreview);
 
         // when they submit, hide the form
         document
@@ -124,12 +126,16 @@ Yours sincerely,`
       function loadFromLocalStorage() {
         const title = localStorage.getItem("title");
         const body = localStorage.getItem("body");
+        const role = localStorage.getItem("role");
 
         if (title) {
           document.querySelector("input#title").value = title;
         }
         if (body) {
           document.querySelector("textarea#message").value = body;
+        }
+        if (role) {
+          document.querySelector("input#signoffRole").value = role;
         }
       }
 
@@ -140,6 +146,7 @@ Yours sincerely,`
         if (template) {
           document.querySelector("input#title").value = template.title;
           document.querySelector("textarea#message").value = template.body;
+          document.querySelector("input#signoffRole").value = template.role;
         }
         updatePreview();
       }
@@ -147,18 +154,22 @@ Yours sincerely,`
       function updatePreview() {
         const title = document.querySelector("input#title").value;
         const body = document.querySelector("textarea#message").value;
+        const role = document.querySelector("input#signoffRole").value;
 
         // save these to local storage
         localStorage.setItem("title", title);
         localStorage.setItem("body", body);
+        localStorage.setItem("role", role);
 
         // Convert markdown to HTML
         const converter = new showdown.Converter();
         const htmlBody = converter.makeHtml(body);
 
         // Update the email preview
+        document.title = title;
         document.querySelector(".email-heading-text").innerText = title;
         document.querySelector(".email-body").innerHTML = htmlBody;
+        document.querySelector(".email-signoff-role").innerText = role;
       }
 
       document.addEventListener("DOMContentLoaded", function () {
@@ -186,17 +197,14 @@ Yours sincerely,`
         </select>
         <br />
         Title:
-        <input
-          type="text"
-          id="title"
-          value="A message regarding School Uniform Standards"
-        />
+        <input type="text" id="title" value="" />
         <br />
         Message:
         <br />
-        <textarea id="message" rows="10" cols="65">
-
-        </textarea>
+        <textarea id="message" rows="10" cols="65"> </textarea>
+        <br />
+        Signoff Role:
+        <input type="text" id="signoffRole" value="Director of Amusing Activities" />
         <br />
         <br />
         <button type="button" id="submitButton">Submit</button>
@@ -346,7 +354,7 @@ Yours sincerely,`
                                                       arial, sans-serif;
                                                   "
                                                   >April Fools<br />
-                                                  <strong
+                                                  <strong class="email-signoff-role"
                                                     >Head of Uniform
                                                     Policy</strong
                                                   ></span
