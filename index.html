@@ -23,6 +23,7 @@
         align-items: center;
       }
       .email-heading-text {
+        color: #fff;
         text-align: center;
         font-size: 36px;
         line-height: 1.1em;
@@ -41,6 +42,15 @@
         color: #002469;
         font-weight: bold;
       }
+
+      @media print {
+        .email-heading-text {
+          color: #fff;
+          color: transparent;
+          text-shadow: 0 0 0px #fff;
+        }
+      }
+
     </style>
     <script src="https://unpkg.com/showdown/dist/showdown.min.js"></script>
     <script>
