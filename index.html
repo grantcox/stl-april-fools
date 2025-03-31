@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>St Leonard's College</title>
+    <style>
+      .form {
+        margin: 0 auto;
+        width: 600px;
+        font-family: lato, helvetica neue, helvetica, arial, sans-serif;
+      }
+      .form input {
+        width: 30rem;
+      }
+      .email-heading {
+        color: #fff;
+        width: 440px;
+        margin-top: -120px;
+        margin-left: auto;
+        margin-right: auto;
+        height: 110px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .email-heading-text {
+        text-align: center;
+        font-size: 36px;
+        line-height: 1.1em;
+        font-family: lato, helvetica neue, helvetica, arial, sans-serif;
+        font-weight: 200;
+      }
+
+      .email-body {
+        font-family: lato, helvetica neue, helvetica, arial, sans-serif;
+        font-size: 14px;
+        color: #000;
+        line-height: 150%;
+        text-align: left;
+      }
+      .email-body strong {
+        color: #002469;
+        font-weight: bold;
+      }
+    </style>
+    <script src="https://unpkg.com/showdown/dist/showdown.min.js"></script>
+    <script>
+      const templates = {
+        uniform: {
+          label: "Strict Uniform Rules",
+          title: "A message regarding School Uniform Standards",
+          body: `
+Dear Students,
+
+Please be advised that we will now be strictly enforcing our uniform policies, as unfortunately some students have been taking advantage of our leniency.
+
+**Correct Summer Attire**
+
+Please refer to our [Uniform Policy](https://www.stleonards.vic.edu.au/wp-content/uploads/2025/01/information-handbook-for-families-2025.pdf) for the correct summer attire.  Some particular areas to note are:
+- The blazer must be worn as the outermost garment when travelling to and from school.  This includes in your car while driving to school.
+- Skirts and dresses must be worn at knee length. This should be precisely to the knee, both when standing and sitting.
+- Shoes must be polished and scuff-free, including the soles of the shoes.
+- Socks must be worn with the school stripes showing.
+
+Students who are found to be in breach of these rules will be required to change at school, using the spare uniform pieces in the lost and found.
+
+**Hairstyles**
+
+Students are required to have their hair cut to a respectable length, at most to the shoulder.  Hair longer than the shoulder must be tied back in a ponytail.  If this ponytail also exceeds the shoulder, it must be tied in a bun.  If the bun is taller than three inches, students will be required wear a crown braid.
+
+**Jewellery**
+
+Students are permitted to wear only a single pair of earrings, which must be plain gold or silver sleepers or studs.  Offending jewellery will be confiscated and auctioned, with the proceeds being donated to the St Leonard's College Foundation.
+
+**Make-up**
+
+Students should not wear make-up to school. This includes mascara, eyeliner, lipstick, and nail polish.  Students whose cheeks are naturally rosy should wear a natural foundation to cover this up.  Students who have long eyelashes may be required to prove these are natural.
+
+Our College remains committed to standards of decorum and conformity.
+
+Yours sincerely,`
+        },
+      }
+
+      function init() {
+        populateTemplateSelect();
+        loadFromLocalStorage();
+        updatePreview();
+        addListeners();
+      }
+
+      function addListeners() {
+        // when they choose a template, populate it
+        document
+          .getElementById("template")
+          .addEventListener("change", onTemplateSelect);
+
+        // when any field changes, update the preview
+        document
+          .querySelector("input#title")
+          .addEventListener("input", updatePreview);
+        document
+          .querySelector("textarea#message")
+          .addEventListener("input", updatePreview);
+
+        // when they submit, hide the form
+        document
+          .getElementById("submitButton")
+          .addEventListener("click", function () {
+            updatePreview();
+            document.querySelector(".form").style.display = "none";
+          });
+      }
+
+      function populateTemplateSelect() {
+        const select = document.getElementById("template");
+        for (const [key, template] of Object.entries(templates)) {
+          const option = document.createElement("option");
+          option.value = key;
+          option.textContent = template.label;
+          select.appendChild(option);
+        }
+      }
+
+      function loadFromLocalStorage() {
+        const title = localStorage.getItem("title");
+        const body = localStorage.getItem("body");
+
+        if (title) {
+          document.querySelector("input#title").value = title;
+        }
+        if (body) {
+          document.querySelector("textarea#message").value = body;
+        }
+      }
+
+      function onTemplateSelect() {
+        const selectedTemplate = document.getElementById("template").value;
+        const template = templates[selectedTemplate];
+
+        if (template) {
+          document.querySelector("input#title").value = template.title;
+          document.querySelector("textarea#message").value = template.body;
+        }
+        updatePreview();
+      }
+
+      function updatePreview() {
+        const title = document.querySelector("input#title").value;
+        const body = document.querySelector("textarea#message").value;
+
+        // save these to local storage
+        localStorage.setItem("title", title);
+        localStorage.setItem("body", body);
+
+        // Convert markdown to HTML
+        const converter = new showdown.Converter();
+        const htmlBody = converter.makeHtml(body);
+
+        // Update the email preview
+        document.querySelector(".email-heading-text").innerText = title;
+        document.querySelector(".email-body").innerHTML = htmlBody;
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        init();
+      });
+    </script>
+  </head>
+  <body>
+    <div class="form">
+      <h1>St Leonards April Fools Message</h1>
+      <p>
+        Choose a template, then edit the title and body as you like. Once you
+        are happy with the preview, click Submit and this form will hide. You
+        can refresh the page to show this form again.
+        <br />
+        <br />
+        Use can use (<a href="https://www.markdownguide.org/basic-syntax"
+          >markdown syntax</a
+        >) to format the email body.
+      </p>
+      <form>
+        Template:
+        <select id="template">
+          <option value="">-- Select a template --</option>
+        </select>
+        <br />
+        Title:
+        <input
+          type="text"
+          id="title"
+          value="A message regarding School Uniform Standards"
+        />
+        <br />
+        Message:
+        <br />
+        <textarea id="message" rows="10" cols="65">
+
+        </textarea>
+        <br />
+        <br />
+        <button type="button" id="submitButton">Submit</button>
+        <br />
+        <br />
+      </form>
+    </div>
+    <table
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      width="100%"
+      id="email"
+      style="height: 100%; margin: 0; padding: 0; width: 100% !important"
+    >
+      <tbody>
+        <tr>
+          <td align="center" valign="top">
+            <table
+              border="0"
+              cellpadding="0"
+              cellspacing="0"
+              width="600"
+              id="m_-2563590099663373391templateContainer"
+              style="border: 1px solid #dddddd; background-color: #ffffff"
+            >
+              <tbody>
+                <tr>
+                  <td align="center" valign="top">
+                    <table
+                      border="0"
+                      cellpadding="0"
+                      cellspacing="0"
+                      width="600"
+                      id="m_-2563590099663373391templateHeader"
+                      style="background-color: #ffffff; border-bottom: 0"
+                    >
+                      <tbody>
+                        <tr>
+                          <td
+                            class="m_-2563590099663373391headerContent"
+                            style="
+                              color: #202020;
+                              font-family: Arial;
+                              font-size: 34px;
+                              font-weight: bold;
+                              line-height: 100%;
+                              padding: 0;
+                              text-align: center;
+                              vertical-align: middle;
+                            "
+                          >
+                            <div style="text-align: center">
+                              <img
+                                height="288"
+                                src="heading.jpg"
+                                style="
+                                  border: 0px;
+                                  width: 600px;
+                                  height: 288px;
+                                  margin: 0px;
+                                  font-size: 14px;
+                                  font-weight: bold;
+                                  line-height: 100%;
+                                  outline: none;
+                                  text-decoration: none;
+                                  text-transform: capitalize;
+                                "
+                                width="600"
+                                class="CToWUd a6T"
+                                data-bit="iit"
+                                tabindex="0"
+                              />
+                              <div class="email-heading">
+                                <div class="email-heading-text"></div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="top">
+                    <table
+                      border="0"
+                      cellpadding="0"
+                      cellspacing="0"
+                      width="600"
+                      id="m_-2563590099663373391templateBody"
+                    >
+                      <tbody>
+                        <tr>
+                          <td
+                            valign="top"
+                            class="m_-2563590099663373391bodyContent"
+                            style="background-color: #ffffff"
+                          >
+                            <table
+                              border="0"
+                              cellpadding="35"
+                              cellspacing="0"
+                              width="100%"
+                            >
+                              <tbody>
+                                <tr>
+                                  <td valign="top">
+                                    <div class="email-body"></div>
+
+                                    <table>
+                                      <tbody valign="top">
+                                        <tr>
+                                          <td width="40%">
+                                            <img
+                                              height="31"
+                                              src="signature.png"
+                                              style="
+                                                border: 0px initial;
+                                                width: 175px;
+                                                height: 31px;
+                                                margin: 0px;
+                                                font-size: 14px;
+                                                font-weight: bold;
+                                                line-height: 100%;
+                                                outline: none;
+                                                text-decoration: none;
+                                                text-transform: capitalize;
+                                                display: inline;
+                                                margin-bottom: 0;
+                                              "
+                                              width="175"
+                                              class="CToWUd"
+                                              data-bit="iit"
+                                            />
+                                          </td>
+                                          <td width="50%">&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                          <td width="40%">
+                                            <span style="color: #000000"
+                                              ><span style="font-size: 14px"
+                                                ><span
+                                                  style="
+                                                    font-family: lato,
+                                                      helvetica neue, helvetica,
+                                                      arial, sans-serif;
+                                                  "
+                                                  >April Fools<br />
+                                                  <strong
+                                                    >Head of Uniform
+                                                    Policy</strong
+                                                  ></span
+                                                ></span
+                                              ></span
+                                            >
+                                          </td>
+                                          <td width="50%">&nbsp;</td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+
+                            <br />
+                            <div
+                              style="
+                                text-align: center;
+                                color: #505050;
+                                font-family: Arial;
+                                font-size: 14px;
+                                line-height: 150%;
+                              "
+                            >
+                              <table
+                                border="0"
+                                cellpadding="0"
+                                cellspacing="0"
+                                width="100%"
+                                id="m_-2563590099663373391templateBannerImage"
+                              >
+                                <tbody>
+                                  <tr>
+                                    <td>
+                                      <div
+                                        style="
+                                          text-align: center;
+                                          margin-top: 15px;
+                                          color: #505050;
+                                          font-family: Arial;
+                                          font-size: 14px;
+                                          line-height: 150%;
+                                        "
+                                      >
+                                        <img
+                                          height="250"
+                                          src="https://mcusercontent.com/9a2b423e25f7e37b54324e190/images/0e23f96e-8f5c-cfa6-759d-d661868ffcd8.jpg"
+                                          style="
+                                            border: 0px;
+                                            width: 600px;
+                                            height: 250px;
+                                            margin: 0px;
+                                            font-size: 14px;
+                                            font-weight: bold;
+                                            line-height: 100%;
+                                            outline: none;
+                                            text-decoration: none;
+                                            text-transform: capitalize;
+                                            display: inline;
+                                            margin-bottom: 0;
+                                          "
+                                          width="600"
+                                          class="CToWUd a6T"
+                                          data-bit="iit"
+                                          tabindex="0"
+                                        />
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                              <div
+                                style="
+                                  background-color: #03182a;
+                                  color: #505050;
+                                  font-family: Arial;
+                                  font-size: 14px;
+                                  line-height: 150%;
+                                  text-align: left;
+                                "
+                                id="m_-2563590099663373391socialDiv"
+                              >
+                                <table
+                                  style="background-color: #03182a"
+                                  border="0"
+                                  cellpadding="20"
+                                  cellspacing="0"
+                                  width="100%"
+                                  id="m_-2563590099663373391socialSection"
+                                >
+                                  <tbody>
+                                    <tr>
+                                      <td width="50%" style="width: 50%">
+                                        <table
+                                          class="m_-2563590099663373391socialMediaTable"
+                                        >
+                                          <tbody>
+                                            <tr>
+                                              <td
+                                                style="
+                                                  margin-left: 10px;
+                                                  width: 35px;
+                                                  height: 35px;
+                                                "
+                                              ></td>
+                                              <td
+                                                style="
+                                                  width: 35px;
+                                                  height: 35px;
+                                                "
+                                              >
+                                                <a
+                                                  href="https://vic.us6.list-manage.com/track/click?u=9a2b423e25f7e37b54324e190&amp;id=71cda45be7&amp;e=cae8c407bc"
+                                                  style="
+                                                    color: #336699;
+                                                    font-weight: normal;
+                                                    text-decoration: underline;
+                                                  "
+                                                  target="_blank"
+                                                  data-saferedirecturl="https://www.google.com/url?q=https://vic.us6.list-manage.com/track/click?u%3D9a2b423e25f7e37b54324e190%26id%3D71cda45be7%26e%3Dcae8c407bc&amp;source=gmail&amp;ust=1743213252860000&amp;usg=AOvVaw0UwdpyhrtYKEZa-G0lP115"
+                                                  ><img
+                                                    src="https://gallery.mailchimp.com/9a2b423e25f7e37b54324e190/images/66aca7d0-8ea8-446a-8747-55fc0c39987f.png"
+                                                    alt="66aca7d0-8ea8-446a-8747-55fc0c39987f.png"
+                                                    style="
+                                                      border: none;
+                                                      font-size: 14px;
+                                                      font-weight: bold;
+                                                      height: auto;
+                                                      line-height: 100%;
+                                                      outline: none;
+                                                      text-decoration: none;
+                                                      text-transform: capitalize;
+                                                      display: inline;
+                                                      margin-bottom: 0;
+                                                    "
+                                                    class="CToWUd"
+                                                    data-bit="iit"
+                                                /></a>
+                                              </td>
+                                              <td
+                                                style="
+                                                  width: 35px;
+                                                  height: 35px;
+                                                "
+                                              >
+                                                <a
+                                                  href="https://vic.us6.list-manage.com/track/click?u=9a2b423e25f7e37b54324e190&amp;id=a4a7bc38a0&amp;e=cae8c407bc"
+                                                  style="
+                                                    color: #336699;
+                                                    font-weight: normal;
+                                                    text-decoration: underline;
+                                                  "
+                                                  target="_blank"
+                                                  data-saferedirecturl="https://www.google.com/url?q=https://vic.us6.list-manage.com/track/click?u%3D9a2b423e25f7e37b54324e190%26id%3Da4a7bc38a0%26e%3Dcae8c407bc&amp;source=gmail&amp;ust=1743213252860000&amp;usg=AOvVaw1fDjOo9rzb483IAOhv67YA"
+                                                  ><img
+                                                    src="https://gallery.mailchimp.com/9a2b423e25f7e37b54324e190/images/1064abdc-999c-4160-9082-8bfcf0b8630a.png"
+                                                    alt="1064abdc-999c-4160-9082-8bfcf0b8630a.png"
+                                                    style="
+                                                      border: none;
+                                                      font-size: 14px;
+                                                      font-weight: bold;
+                                                      height: auto;
+                                                      line-height: 100%;
+                                                      outline: none;
+                                                      text-decoration: none;
+                                                      text-transform: capitalize;
+                                                      display: inline;
+                                                      margin-bottom: 0;
+                                                    "
+                                                    class="CToWUd"
+                                                    data-bit="iit"
+                                                /></a>
+                                              </td>
+                                              <td
+                                                style="
+                                                  width: 35px;
+                                                  height: 35px;
+                                                "
+                                              >
+                                                <a
+                                                  href="https://vic.us6.list-manage.com/track/click?u=9a2b423e25f7e37b54324e190&amp;id=91440a4d1f&amp;e=cae8c407bc"
+                                                  style="
+                                                    color: #336699;
+                                                    font-weight: normal;
+                                                    text-decoration: underline;
+                                                  "
+                                                  target="_blank"
+                                                  data-saferedirecturl="https://www.google.com/url?q=https://vic.us6.list-manage.com/track/click?u%3D9a2b423e25f7e37b54324e190%26id%3D91440a4d1f%26e%3Dcae8c407bc&amp;source=gmail&amp;ust=1743213252860000&amp;usg=AOvVaw0PoedcEkibSzRnBszURHEK"
+                                                  ><img
+                                                    src="https://gallery.mailchimp.com/9a2b423e25f7e37b54324e190/images/37ad4d0a-e08a-4b62-bd3e-b388f6035c06.png"
+                                                    alt="37ad4d0a-e08a-4b62-bd3e-b388f6035c06.png"
+                                                    style="
+                                                      border: none;
+                                                      font-size: 14px;
+                                                      font-weight: bold;
+                                                      height: auto;
+                                                      line-height: 100%;
+                                                      outline: none;
+                                                      text-decoration: none;
+                                                      text-transform: capitalize;
+                                                      display: inline;
+                                                      margin-bottom: 0;
+                                                    "
+                                                    class="CToWUd"
+                                                    data-bit="iit"
+                                                /></a>
+                                              </td>
+                                              <td
+                                                style="
+                                                  width: 35px;
+                                                  height: 35px;
+                                                "
+                                              >
+                                                <a
+                                                  href="https://vic.us6.list-manage.com/track/click?u=9a2b423e25f7e37b54324e190&amp;id=4f3aa9d5b2&amp;e=cae8c407bc"
+                                                  style="
+                                                    color: #336699;
+                                                    font-weight: normal;
+                                                    text-decoration: underline;
+                                                  "
+                                                  target="_blank"
+                                                  data-saferedirecturl="https://www.google.com/url?q=https://vic.us6.list-manage.com/track/click?u%3D9a2b423e25f7e37b54324e190%26id%3D4f3aa9d5b2%26e%3Dcae8c407bc&amp;source=gmail&amp;ust=1743213252860000&amp;usg=AOvVaw2fuY2UTAw8Ii8uEZ9xcmmw"
+                                                  ><img
+                                                    src="https://gallery.mailchimp.com/9a2b423e25f7e37b54324e190/images/5840b27b-32e7-494a-a8e3-34641cf09d9a.png"
+                                                    alt="5840b27b-32e7-494a-a8e3-34641cf09d9a.png"
+                                                    style="
+                                                      border: none;
+                                                      font-size: 14px;
+                                                      font-weight: bold;
+                                                      height: auto;
+                                                      line-height: 100%;
+                                                      outline: none;
+                                                      text-decoration: none;
+                                                      text-transform: capitalize;
+                                                      display: inline;
+                                                      margin-bottom: 0;
+                                                    "
+                                                    class="CToWUd"
+                                                    data-bit="iit"
+                                                /></a>
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                      </td>
+                                      <td width="30%" style="width: 30%">
+                                        <table>
+                                          <tbody>
+                                            <tr>
+                                              <td style="height: 35px">
+                                                <a
+                                                  style="
+                                                    text-decoration: none;
+                                                    color: #ffffff;
+                                                    font-weight: normal;
+                                                  "
+                                                  href="https://vic.us6.list-manage.com/track/click?u=9a2b423e25f7e37b54324e190&amp;id=b57e11e14b&amp;e=cae8c407bc"
+                                                  target="_blank"
+                                                  data-saferedirecturl="https://www.google.com/url?q=https://vic.us6.list-manage.com/track/click?u%3D9a2b423e25f7e37b54324e190%26id%3Db57e11e14b%26e%3Dcae8c407bc&amp;source=gmail&amp;ust=1743213252860000&amp;usg=AOvVaw3iLEomd29d5p_kP3ygqAMb"
+                                                  >stleonards.vic.edu.au</a
+                                                >
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="top">
+                    <table
+                      border="0"
+                      cellpadding="0"
+                      cellspacing="0"
+                      width="100%"
+                      id="m_-2563590099663373391templateBannerImage"
+                    >
+                      <tbody>
+                        <tr>
+                          <td>
+                            <div style="text-align: center; margin-top: 15px">
+                              <span
+                                style="
+                                  font-family: lato, helvetica neue, helvetica,
+                                    arial, sans-serif;
+                                "
+                                ><span style="color: #696969">&nbsp;&nbsp;</span
+                                ><span style="font-size: 12px"
+                                  ><span style="color: #696969"
+                                    >Images featured within this communication
+                                    and on STL Link are not to be copied or
+                                    reproduced.</span
+                                  ><br />
+                                  <a
+                                    href="https://mailchi.mp/92f1ac18f8bf/update-from-the-head-of-junior-school?e=cae8c407bc"
+                                    style="color: #053d76"
+                                    target="_blank"
+                                    data-saferedirecturl="https://www.google.com/url?q=https://mailchi.mp/92f1ac18f8bf/update-from-the-head-of-junior-school?e%3Dcae8c407bc&amp;source=gmail&amp;ust=1743213252860000&amp;usg=AOvVaw2kJZNJVimHXfOw02oqZlua"
+                                    ><span style="color: #002469"
+                                      >view email in browser</span
+                                    ></a
+                                  ><br />
+                                  <br />
+                                  <span style="color: #696969"
+                                    ><strong
+                                      >Unsubscribe from this list - Important
+                                      Notice</strong
+                                    ><br />
+                                    If you are a current parent and you nominate
+                                    to unsubscribe from this list of email
+                                    communications, you will no longer receive
+                                    any other emails from St Leonard’s College
+                                    via this email service provider
+                                    (Mailchimp).<br />
+                                    You will need to resubscribe to receive any
+                                    future emails.<br />
+                                    Unsubscribing from selected communication
+                                    topics is not currently available.<br />
+                                    Consequently, we strongly recommend against
+                                    unsubscribing to ensure you continue to
+                                    receive important email communications from
+                                    the College.</span
+                                  ><br />
+                                  <a
+                                    href="https://vic.us6.list-manage.com/unsubscribe?u=9a2b423e25f7e37b54324e190&amp;id=880af58554&amp;t=b&amp;e=cae8c407bc&amp;c=efe471b355"
+                                    style="color: #053d76"
+                                    target="_blank"
+                                    data-saferedirecturl="https://www.google.com/url?q=https://vic.us6.list-manage.com/unsubscribe?u%3D9a2b423e25f7e37b54324e190%26id%3D880af58554%26t%3Db%26e%3Dcae8c407bc%26c%3Defe471b355&amp;source=gmail&amp;ust=1743213252860000&amp;usg=AOvVaw3lwMngRYn1VL1GoGr3u-aP"
+                                    ><span style="color: #002469"
+                                      >unsubscribe</span
+                                    ></a
+                                  ><span style="color: #002469">
+                                    &nbsp;</span
+                                  ></span
+                                ><span style="color: #002469"
+                                  >&nbsp;</span
+                                ></span
+                              ><br />
+                              &nbsp;
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <br />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>
