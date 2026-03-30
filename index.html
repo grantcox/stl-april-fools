@@ -173,6 +173,11 @@ Yum yum,`,
             updatePreview();
             document.querySelector(".form").style.display = "none";
           });
+
+        // copy for email button
+        document
+          .getElementById("copyForEmailButton")
+          .addEventListener("click", copyForEmail);
       }
 
       function populateTemplateSelect() {
@@ -234,6 +239,77 @@ Yum yum,`,
         document.querySelector(".email-signoff-role").innerText = role;
       }
 
+      function copyForEmail() {
+        const emailElement = document.getElementById("email");
+
+        // Clone the email content
+        const clone = emailElement.cloneNode(true);
+
+        // Function to inline computed styles on an element
+        function inlineStyles(original, cloned) {
+          const computedStyle = window.getComputedStyle(original);
+
+          // Key CSS properties to inline for email compatibility
+          const properties = [
+            'color', 'background-color', 'font-family', 'font-size', 'font-weight',
+            'font-style', 'text-align', 'text-decoration', 'line-height',
+            'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
+            'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
+            'border', 'width', 'height', 'display', 'vertical-align',
+            'justify-content', 'align-items', 'flex-direction'
+          ];
+
+          let styleString = cloned.getAttribute('style') || '';
+          properties.forEach(prop => {
+            const value = computedStyle.getPropertyValue(prop);
+            if (value && value !== 'initial' && value !== 'none' && value !== 'normal') {
+              // Only add if not already in inline style
+              if (!styleString.includes(prop + ':')) {
+                styleString += `${prop}: ${value}; `;
+              }
+            }
+          });
+          cloned.setAttribute('style', styleString);
+        }
+
+        // Walk through all elements and inline their styles
+        const originalElements = emailElement.querySelectorAll('*');
+        const clonedElements = clone.querySelectorAll('*');
+
+        // Inline styles on the root element too
+        inlineStyles(emailElement, clone);
+
+        originalElements.forEach((orig, i) => {
+          inlineStyles(orig, clonedElements[i]);
+        });
+
+        // Convert relative image URLs to absolute
+        const images = clone.querySelectorAll('img');
+        images.forEach(img => {
+          const src = img.getAttribute('src');
+          if (src && !src.startsWith('http')) {
+            img.setAttribute('src', new URL(src, window.location.href).href);
+          }
+        });
+
+        // Get the HTML string
+        const htmlContent = clone.outerHTML;
+
+        // Copy to clipboard as HTML
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const clipboardItem = new ClipboardItem({
+          'text/html': blob,
+          'text/plain': new Blob([htmlContent], { type: 'text/plain' })
+        });
+
+        navigator.clipboard.write([clipboardItem]).then(() => {
+          alert('Email copied to clipboard! You can now paste it into your email client.');
+        }).catch(err => {
+          console.error('Failed to copy:', err);
+          alert('Failed to copy. Please try again.');
+        });
+      }
+
       document.addEventListener("DOMContentLoaded", function () {
         init();
       });
@@ -270,6 +346,7 @@ Yum yum,`,
         <br />
         <br />
         <button type="button" id="submitButton">Submit</button>
+        <button type="button" id="copyForEmailButton">Copy for Email</button>
         <br />
         <br />
       </form>
