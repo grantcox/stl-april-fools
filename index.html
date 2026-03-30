@@ -239,8 +239,12 @@ Yum yum,`,
         document.querySelector(".email-signoff-role").innerText = role;
       }
 
-      function copyForEmail() {
+      async function copyForEmail() {
         const emailElement = document.getElementById("email");
+        const titleText = document.querySelector('.email-heading-text')?.innerText || '';
+
+        // Generate composite header image with title baked in
+        const headerDataUrl = await generateHeaderImage(titleText);
 
         // Clone the email content
         const clone = emailElement.cloneNode(true);
@@ -283,19 +287,12 @@ Yum yum,`,
           inlineStyles(orig, clonedElements[i]);
         });
 
-        // Replace header with email-compatible structure: wrapper div with relative position
+        // Replace header with composite image (title baked in)
         const headerTd = clone.querySelector('#m_-2563590099663373391templateHeader td');
         if (headerTd) {
-          const titleText = clone.querySelector('.email-heading-text')?.innerText || '';
-          const img = headerTd.querySelector('img');
-          const imgSrc = img ? new URL(img.getAttribute('src'), window.location.href).href : '';
-
-          // Rebuild with negative margin to overlay text on image (email-compatible)
+          // Remove the old heading divs and replace image with composite
           headerTd.innerHTML = `
-            <img src="${imgSrc}" width="600" height="288" style="display: block; width: 600px; height: 288px; border: 0;" />
-            <div style="margin-top: -70px; height: 70px; color: #ffffff; text-align: center; font-size: 36px; line-height: 1.1em; font-family: lato, helvetica neue, helvetica, arial, sans-serif; font-weight: 200;">
-              ${titleText}
-            </div>
+            <img src="${headerDataUrl}" width="600" height="288" style="display: block; width: 600px; height: 288px; border: 0;" />
           `;
         }
 
@@ -303,7 +300,7 @@ Yum yum,`,
         const images = clone.querySelectorAll('img');
         images.forEach(img => {
           const src = img.getAttribute('src');
-          if (src && !src.startsWith('http')) {
+          if (src && !src.startsWith('http') && !src.startsWith('data:')) {
             img.setAttribute('src', new URL(src, window.location.href).href);
           }
         });
@@ -323,6 +320,74 @@ Yum yum,`,
         }).catch(err => {
           console.error('Failed to copy:', err);
           alert('Failed to copy. Please try again.');
+        });
+      }
+
+      function generateHeaderImage(titleText) {
+        return new Promise((resolve) => {
+          const canvas = document.createElement('canvas');
+          canvas.width = 600;
+          canvas.height = 288;
+          const ctx = canvas.getContext('2d');
+
+          // Load the header image
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = function() {
+            // Draw the background image
+            ctx.drawImage(img, 0, 0, 600, 288);
+
+            // Draw the title text
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '200 36px Lato, "Helvetica Neue", Helvetica, Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Position text in the lower portion of the image (where the original overlay was)
+            const textY = 288 - 60; // 60px from bottom
+
+            // Handle multi-line text if needed
+            const words = titleText.split(' ');
+            const maxWidth = 440;
+            let lines = [];
+            let currentLine = '';
+
+            words.forEach(word => {
+              const testLine = currentLine ? currentLine + ' ' + word : word;
+              const metrics = ctx.measureText(testLine);
+              if (metrics.width > maxWidth && currentLine) {
+                lines.push(currentLine);
+                currentLine = word;
+              } else {
+                currentLine = testLine;
+              }
+            });
+            lines.push(currentLine);
+
+            // Draw lines centered vertically around textY
+            const lineHeight = 40;
+            const totalHeight = lines.length * lineHeight;
+            const startY = textY - (totalHeight / 2) + (lineHeight / 2);
+
+            lines.forEach((line, i) => {
+              ctx.fillText(line, 300, startY + (i * lineHeight));
+            });
+
+            resolve(canvas.toDataURL('image/jpeg', 0.9));
+          };
+
+          img.onerror = function() {
+            // If image fails to load, just create a plain background
+            ctx.fillStyle = '#002469';
+            ctx.fillRect(0, 0, 600, 288);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '200 36px Lato, "Helvetica Neue", Helvetica, Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(titleText, 300, 230);
+            resolve(canvas.toDataURL('image/jpeg', 0.9));
+          };
+
+          img.src = 'heading.jpg';
         });
       }
 
