@@ -283,6 +283,22 @@ Yum yum,`,
           inlineStyles(orig, clonedElements[i]);
         });
 
+        // Replace header with email-compatible structure: wrapper div with relative position
+        const headerTd = clone.querySelector('#m_-2563590099663373391templateHeader td');
+        if (headerTd) {
+          const titleText = clone.querySelector('.email-heading-text')?.innerText || '';
+          const img = headerTd.querySelector('img');
+          const imgSrc = img ? new URL(img.getAttribute('src'), window.location.href).href : '';
+
+          // Rebuild with negative margin to overlay text on image (email-compatible)
+          headerTd.innerHTML = `
+            <img src="${imgSrc}" width="600" height="288" style="display: block; width: 600px; height: 288px; border: 0;" />
+            <div style="margin-top: -70px; height: 70px; color: #ffffff; text-align: center; font-size: 36px; line-height: 1.1em; font-family: lato, helvetica neue, helvetica, arial, sans-serif; font-weight: 200;">
+              ${titleText}
+            </div>
+          `;
+        }
+
         // Convert relative image URLs to absolute
         const images = clone.querySelectorAll('img');
         images.forEach(img => {
